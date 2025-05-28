@@ -20,23 +20,23 @@ public class ControladorDocente extends ControladorGeneral {
         if (this.profesor == null) {
             System.err.println("Advertencia: Profesor con código " + codigoProfesor + " no encontrado.");
         } else {
-            // If professor and their assigned course exist, refresh the course to its latest state
+            // Si el profesor y su curso asignado existen, actualizar el curso a su estado más reciente
             if (this.profesor.getCurso() != null) {
-                Curso cursoOriginalStale = this.profesor.getCurso();
-                // Fetch the LATEST version of this course from the central source of truth (cursos.dat via Colegio)
-                Curso cursoActualizado = this.colegio.buscarCurso(cursoOriginalStale.getGrado(), cursoOriginalStale.getGrupo());
+                Curso cursoOriginalObsoleto = this.profesor.getCurso();
+                // Obtener la ÚLTIMA versión de este curso desde la fuente central de verdad (cursos.dat a través de Colegio)
+                Curso cursoActualizado = this.colegio.buscarCurso(cursoOriginalObsoleto.getGrado(), cursoOriginalObsoleto.getGrupo());
                 
                 if (cursoActualizado != null) {
-                    // Replace the (potentially) stale Curso object in the loaded Profesor instance
-                    // with the fresh one.
+                    // Reemplazar el objeto Curso (potencialmente) obsoleto en la instancia cargada del Profesor
+                    // con el actualizado.
                     this.profesor.setCurso(cursoActualizado); 
                 } else {
-                    // The course assigned to the professor was not found in cursos.dat. This is an inconsistency.
-                    System.err.println("Advertencia: El curso " + cursoOriginalStale.getGrado() + "-" + cursoOriginalStale.getGrupo() + 
+                    // El curso asignado al profesor no se encontró en cursos.dat. Esto es una inconsistencia.
+                    System.err.println("Advertencia: El curso " + cursoOriginalObsoleto.getGrado() + "-" + cursoOriginalObsoleto.getGrupo() + 
                                        " asignado al profesor " + codigoProfesor + 
                                        " no fue encontrado en la base de datos de cursos. El profesor podría estar mostrando información de curso desactualizada o incorrecta.");
-                    // Not setting this.profesor.setCurso(null) here to allow viewing of potentially stale data if course was deleted,
-                    // but operations requiring course consistency might fail later. Error log is important.
+                    // No se establece this.profesor.setCurso(null) aquí para permitir la visualización de datos potencialmente obsoletos si el curso fue eliminado,
+                    // pero las operaciones que requieren consistencia del curso podrían fallar más tarde. El registro de errores es importante.
                 }
             }
         }
@@ -55,10 +55,10 @@ public class ControladorDocente extends ControladorGeneral {
         }
 
         try {
-            // Pass the actual Estudiante object to the professor's method
+            // Pasar el objeto Estudiante real al método del profesor
             this.profesor.calificarEstudiante(estudianteAcalificar, nombreAsignatura, nombreCalificacion, nota, periodo, fecha);
             
-            // Persist the changes made to the student
+            // Persistir los cambios realizados en el estudiante
             colegio.guardarCambiosEstudiante(estudianteAcalificar); // Throws IOException, CNFE
 
         } catch (IllegalStateException | IllegalArgumentException e) {

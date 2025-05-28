@@ -28,9 +28,9 @@ public class Profesor extends Persona implements Serializable {
     }
     
     public void calificarEstudiante(Estudiante estudiante, String nombreAsignatura, String nombreCalificacion, float nota, int periodo, LocalDate fecha) {
-        // The check for this.curso might still be relevant if a professor can only calify students
-        // if they are generally assigned to any course, even if the student is passed directly.
-        // However, the explicit lookup of the student via this.curso is removed.
+        // La comprobación de this.curso aún podría ser relevante si un profesor solo puede calificar estudiantes
+        // si generalmente están asignados a algún curso, incluso si el estudiante se pasa directamente.
+        // Sin embargo, se elimina la búsqueda explícita del estudiante a través de this.curso.
         // if (this.curso == null) {
         //     throw new IllegalStateException("El profesor no tiene un curso asignado y no puede calificar.");
         // }
