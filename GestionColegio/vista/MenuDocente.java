@@ -54,7 +54,7 @@ public class MenuDocente extends javax.swing.JFrame {
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
 
-        // Horizontal Group
+        // Grupo Horizontal
         layout.setHorizontalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(lblEstudiante)
@@ -132,7 +132,7 @@ public class MenuDocente extends javax.swing.JFrame {
             } else {
                  areaInfoCursoEstudiantes.append("\nNo hay estudiantes matriculados en este curso.");
             }
-            // Populate subjects for the teacher's course
+            // Poblar asignaturas del curso del docente
             cmbAsignaturas.removeAllItems();
             if (profesor.getCurso() != null && profesor.getCurso().getASignaturas() != null && !profesor.getCurso().getASignaturas().isEmpty()) {
                 for (Asignatura asig : profesor.getCurso().getASignaturas()) {
@@ -159,7 +159,7 @@ public class MenuDocente extends javax.swing.JFrame {
         if (!habilitar) {
             cmbAsignaturas.removeAllItems();
         } else {
-            // Ensure cmbAsignaturas is populated if it was cleared but should be enabled
+            // Asegurar que cmbAsignaturas se pueble si fue limpiado pero debería estar habilitado
             if (cmbAsignaturas.getItemCount() == 0 && curso != null && curso.getASignaturas() != null && !curso.getASignaturas().isEmpty()) {
                 for (Asignatura asig : curso.getASignaturas()) {
                     cmbAsignaturas.addItem(asig);
@@ -167,10 +167,10 @@ public class MenuDocente extends javax.swing.JFrame {
             }
         }
         
-        // Disable student combobox if no students
+        // Deshabilitar combobox de estudiantes si no hay estudiantes
         cmbEstudiantes.setEnabled(profesor != null && curso != null && curso.getEstudiantes() != null && !curso.getEstudiantes().isEmpty());
 
-        // If no students, also disable subject related controls
+        // Si no hay estudiantes, deshabilitar también los controles relacionados con las asignaturas
         if (cmbEstudiantes.getItemCount() == 0) {
             cmbAsignaturas.setEnabled(false);
             btnAgregarCalificacion.setEnabled(false);
@@ -220,7 +220,7 @@ public class MenuDocente extends javax.swing.JFrame {
             }
         });
         
-        // Initial call to set component states correctly after everything is loaded.
+        // Llamada inicial para establecer los estados de los componentes correctamente después de que todo esté cargado.
         actualizarEstadoControlesAsignatura(); 
     }
 }

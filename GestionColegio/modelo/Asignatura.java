@@ -55,21 +55,21 @@ public class Asignatura implements Descriptible, Serializable {
     
 
     /**
-     * @return the nombre
+     * @return el nombre
      */
     public String getNombre() {
         return nombre;
     }
 
     /**
-     * @param nombre the nombre to set
+     * @param nombre el nombre a establecer
      */
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
     /**
-     * @return the calificaciones
+     * @return las calificaciones
      */
     public ArrayList<Calificacion> getCalificaciones() {
         if (this.calificaciones == null) {
@@ -79,7 +79,7 @@ public class Asignatura implements Descriptible, Serializable {
     }
 
     /**
-     * @param calificaciones the calificaciones to set
+     * @param calificaciones las calificaciones a establecer
      */
     public void setCalificaciones(ArrayList<Calificacion> calificaciones) {
         this.calificaciones = calificaciones;
