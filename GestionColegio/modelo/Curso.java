@@ -83,8 +83,17 @@ public class Curso implements Descriptible, Serializable {
         if (this.asignaturas == null) {
             this.asignaturas = new ArrayList<>();
         }
-        if (asignatura != null && !this.asignaturas.contains(asignatura)) { 
-            this.asignaturas.add(asignatura);
+        if (asignatura != null && asignatura.getNombre() != null) { // Ensure asignatura and its name are not null
+            boolean alreadyExists = false;
+            for (Asignatura existingAsig : this.asignaturas) {
+                if (existingAsig.getNombre().equalsIgnoreCase(asignatura.getNombre())) {
+                    alreadyExists = true;
+                    break;
+                }
+            }
+            if (!alreadyExists) {
+                this.asignaturas.add(asignatura);
+            }
         }
     }
 
