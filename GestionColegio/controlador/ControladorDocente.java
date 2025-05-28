@@ -15,9 +15,30 @@ public class ControladorDocente extends ControladorGeneral {
 
     public ControladorDocente(Colegio colegio, int codigoProfesor) throws IOException, ClassNotFoundException {
         super(colegio);
-        this.profesor = colegio.buscarProfesor(codigoProfesor);
+        this.profesor = colegio.buscarProfesor(codigoProfesor); 
+
         if (this.profesor == null) {
             System.err.println("Advertencia: Profesor con código " + codigoProfesor + " no encontrado.");
+        } else {
+            // If professor and their assigned course exist, refresh the course to its latest state
+            if (this.profesor.getCurso() != null) {
+                Curso cursoOriginalStale = this.profesor.getCurso();
+                // Fetch the LATEST version of this course from the central source of truth (cursos.dat via Colegio)
+                Curso cursoActualizado = this.colegio.buscarCurso(cursoOriginalStale.getGrado(), cursoOriginalStale.getGrupo());
+                
+                if (cursoActualizado != null) {
+                    // Replace the (potentially) stale Curso object in the loaded Profesor instance
+                    // with the fresh one.
+                    this.profesor.setCurso(cursoActualizado); 
+                } else {
+                    // The course assigned to the professor was not found in cursos.dat. This is an inconsistency.
+                    System.err.println("Advertencia: El curso " + cursoOriginalStale.getGrado() + "-" + cursoOriginalStale.getGrupo() + 
+                                       " asignado al profesor " + codigoProfesor + 
+                                       " no fue encontrado en la base de datos de cursos. El profesor podría estar mostrando información de curso desactualizada o incorrecta.");
+                    // Not setting this.profesor.setCurso(null) here to allow viewing of potentially stale data if course was deleted,
+                    // but operations requiring course consistency might fail later. Error log is important.
+                }
+            }
         }
     }
 

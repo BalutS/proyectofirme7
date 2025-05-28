@@ -106,53 +106,61 @@ public class Colegio {
     }
     
     public void agregarEstudianteACurso(int codigoEstudiante, int gradoCurso, int grupoCurso) throws IOException, ClassNotFoundException {
-        Estudiante est = buscarEstudiante(codigoEstudiante); // Already uses DAO
-        Curso curso = buscarCurso(gradoCurso, grupoCurso);   // Already uses DAO
+        Estudiante est = buscarEstudiante(codigoEstudiante);
+        Curso curso = buscarCurso(gradoCurso, grupoCurso);
 
         if (est != null && curso != null) {
-            // Initialize student list in course if null
+            boolean courseNeedsSave = false;
             if (curso.getEstudiantes() == null) {
                 curso.setEstudiantes(new ArrayList<>());
+                // courseNeedsSave = true; // Initializing to empty list doesn't change persisted state yet
             }
-            // Add student to course's list and set course in student
+            
             boolean alreadyEnrolled = false;
-            for(Estudiante e : curso.getEstudiantes()){
-                if(e.getCodigo() == est.getCodigo()){
+            for (Estudiante e : curso.getEstudiantes()) {
+                if (e.getCodigo() == est.getCodigo()) {
                     alreadyEnrolled = true;
                     break;
                 }
             }
-            if(!alreadyEnrolled){
+            
+            if (!alreadyEnrolled) {
                 curso.getEstudiantes().add(est);
-            }
-            est.setCurso(curso);
-
-            // Save the updated Estudiante
-            ArrayList<Estudiante> todosEstudiantes = estudianteDAO.listarEstudiantes();
-            boolean estudianteActualizado = false;
-            for (int i = 0; i < todosEstudiantes.size(); i++) {
-                if (todosEstudiantes.get(i).getCodigo() == est.getCodigo()) {
-                    todosEstudiantes.set(i, est); // est is the modified object
-                    estudianteActualizado = true;
-                    break;
-                }
-            }
-            if (estudianteActualizado) {
-                estudianteDAO.actualizarListaEstudiantes(todosEstudiantes);
+                courseNeedsSave = true; // Course's student list has changed
             }
 
-            // Save the updated Curso
-            ArrayList<Curso> todosCursos = cursoDAO.listarCursos();
-            boolean cursoActualizado = false;
-            for (int i = 0; i < todosCursos.size(); i++) {
-                if (todosCursos.get(i).getGrado() == curso.getGrado() && todosCursos.get(i).getGrupo() == curso.getGrupo()) {
-                    todosCursos.set(i, curso); // curso is the modified object
-                    cursoActualizado = true;
-                    break;
-                }
+            boolean studentNeedsSave = false;
+            // Check if the student's course reference needs updating or is being set for the first time
+            if (est.getCurso() == null || 
+                !(est.getCurso().getGrado() == curso.getGrado() && est.getCurso().getGrupo() == curso.getGrupo()) ||
+                !alreadyEnrolled) { // If added to course, ensure student's side is also updated/saved
+                est.setCurso(curso);
+                studentNeedsSave = true;
             }
-            if (cursoActualizado) {
-                cursoDAO.actualizarListaCursos(todosCursos);
+            
+            // Only save if changes were made that affect persistence
+            if (studentNeedsSave) {
+                this.guardarCambiosEstudiante(est);
+            }
+            
+            if (courseNeedsSave) {
+                // If the student was added to the course, the course object changed.
+                // Also, if the student's course reference was updated TO THIS COURSE,
+                // and this course object itself didn't have its student list changed (because student was already in it),
+                // we might not need to save the course.
+                // However, if 'est.setCurso(curso)' happened, and 'est' is now part of 'curso.getEstudiantes()',
+                // then 'curso' object (which holds references) might be considered changed.
+                // The original code saved both if est and curso were not null.
+                // Let's ensure course is saved if its student list changed.
+                this.guardarCambiosCurso(curso);
+            } else if (studentNeedsSave && est.getCurso().equals(curso)) {
+                // This case: student's course was set to this 'curso', but 'curso's student list didn't change
+                // (e.g. student was already in the list). We might not need to save 'curso' again.
+                // But, if 'curso.getEstudiantes().add(est)' did not happen,
+                // and only 'est.setCurso(curso)' happened, then only student needs saving.
+                // The current logic for courseNeedsSave only true if student added to list.
+                // This is fine. If only est.setCurso() changed, only student is saved.
+                // If student added to curso.getEstudiantes(), curso is saved.
             }
         }
     }
