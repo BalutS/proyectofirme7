@@ -1,6 +1,8 @@
 package com.controlador;
 
 import com.modelo.*;
+import java.io.IOException;
+import java.lang.ClassNotFoundException;
 
 /**
  *
@@ -9,7 +11,7 @@ import com.modelo.*;
 public class ControladorEstudiante extends ControladorGeneral {
     private Estudiante estudiante;
 
-    public ControladorEstudiante(Colegio colegio, int codigoEstudiante) {
+    public ControladorEstudiante(Colegio colegio, int codigoEstudiante) throws IOException, ClassNotFoundException {
         super(colegio);
         this.estudiante = colegio.buscarEstudiante(codigoEstudiante);
         if (this.estudiante == null) {

@@ -1,10 +1,12 @@
 package com.modelo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author SOTO PC
  */
-public abstract class Persona implements Descriptible { 
+public abstract class Persona implements Descriptible, Serializable { 
     private String nombre;
     private int edad;
     private int cedula;

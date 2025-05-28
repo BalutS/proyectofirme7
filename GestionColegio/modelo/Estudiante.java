@@ -1,12 +1,14 @@
 package com.modelo;
 
+import java.io.Serializable;
+
 /**
  *
  * @author SOTO PC
  */
 import java.util.ArrayList;
 
-public class Estudiante extends Persona {
+public class Estudiante extends Persona implements Serializable {
     private Curso curso;
     private ArrayList<Asignatura> asignaturas;
 

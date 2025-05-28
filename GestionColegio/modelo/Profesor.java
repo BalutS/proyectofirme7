@@ -2,12 +2,13 @@ package com.modelo;
 
 import java.util.ArrayList; 
 import java.time.LocalDate; 
+import java.io.Serializable;
 
 /**
  *
  * @author SOTO PC
  */
-public class Profesor extends Persona {
+public class Profesor extends Persona implements Serializable {
     private Curso curso; 
 
     public Profesor() {
@@ -26,14 +27,18 @@ public class Profesor extends Persona {
         this.curso = curso;
     }
     
-    public void calificarEstudiante(int codEst, String nombreAsignatura, String nombreCalificacion, float nota, int periodo, LocalDate fecha) {
-        if (this.curso == null) {
-            throw new IllegalStateException("El profesor no tiene un curso asignado y no puede calificar.");
-        }
-        Estudiante estudiante = this.curso.buscarEstudiante(codEst);
+    public void calificarEstudiante(Estudiante estudiante, String nombreAsignatura, String nombreCalificacion, float nota, int periodo, LocalDate fecha) {
+        // The check for this.curso might still be relevant if a professor can only calify students
+        // if they are generally assigned to any course, even if the student is passed directly.
+        // However, the explicit lookup of the student via this.curso is removed.
+        // if (this.curso == null) {
+        //     throw new IllegalStateException("El profesor no tiene un curso asignado y no puede calificar.");
+        // }
+
         if (estudiante == null) {
-            throw new IllegalArgumentException("Estudiante con código " + codEst + " no encontrado en el curso del profesor.");
+            throw new IllegalArgumentException("Estudiante no puede ser null.");
         }
+
         Asignatura asignatura = estudiante.buscarAsignatura(nombreAsignatura);
         if (asignatura == null) {
             throw new IllegalArgumentException("Asignatura \"" + nombreAsignatura + "\" no encontrada para el estudiante " + estudiante.getNombre() + ".");
