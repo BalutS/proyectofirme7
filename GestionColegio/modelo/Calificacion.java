@@ -1,5 +1,6 @@
 package com.modelo;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -7,7 +8,7 @@ import java.time.format.DateTimeFormatter;
  *
  * @author river
  */
-public class Calificacion {
+public class Calificacion implements Serializable {
     private String nombre;
     private float nota;
     private int periodo;

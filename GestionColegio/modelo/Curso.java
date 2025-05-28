@@ -1,12 +1,13 @@
 package com.modelo;
 
 import java.util.ArrayList; 
+import java.io.Serializable;
 
 /**
  *
  * @author SOTO PC
  */
-public class Curso implements Descriptible {
+public class Curso implements Descriptible, Serializable {
     private int grado;
     private int grupo;
     private ArrayList<Estudiante> estudiantes;

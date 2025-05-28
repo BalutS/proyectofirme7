@@ -4,13 +4,14 @@
  */
 package com.modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author river
  */
-public class Asignatura implements Descriptible {
+public class Asignatura implements Descriptible, Serializable {
     private String nombre;
     private ArrayList<Calificacion> calificaciones;
 
