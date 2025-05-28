@@ -107,50 +107,75 @@ public class MenuDocente extends javax.swing.JFrame {
 
         if (profesor == null) {
             areaInfoCursoEstudiantes.setText("Error: No se pudo cargar la información del profesor.");
-            disableInteraction();
+            actualizarEstadoControlesAsignatura();
             return;
         }
 
         Curso curso = profesor.getCurso();
-        areaInfoCursoEstudiantes.setText("Profesor: " + profesor.getInfoCompleta() + "\n\n"); 
+        areaInfoCursoEstudiantes.setText("Profesor: " + profesor.getInfoCompleta() + "\n\n");
 
         if (curso == null) {
             areaInfoCursoEstudiantes.append("No tiene un curso asignado actualmente.");
-            disableInteraction();
+            actualizarEstadoControlesAsignatura();
         } else {
-            areaInfoCursoEstudiantes.append("Curso Asignado: " + curso.toString() + "\n\n"); 
+            areaInfoCursoEstudiantes.append("Curso Asignado: " + curso.toString() + "\n\n");
             areaInfoCursoEstudiantes.append("--- Estudiantes del Curso ---\n" + controlador.listarEstudiantesEnCurso());
 
             cmbEstudiantes.removeAllItems();
             if (curso.getEstudiantes() != null && !curso.getEstudiantes().isEmpty()) {
                 for (Estudiante est : curso.getEstudiantes()) {
-                    cmbEstudiantes.addItem(est); 
+                    cmbEstudiantes.addItem(est);
                 }
                 if (cmbEstudiantes.getItemCount() > 0) {
-                    cmbEstudiantes.setSelectedIndex(0); 
+                    cmbEstudiantes.setSelectedIndex(0);
                 }
             } else {
                  areaInfoCursoEstudiantes.append("\nNo hay estudiantes matriculados en este curso.");
-                 disableStudentSpecificInteraction(); 
             }
-            enableInteraction();
+            // Populate subjects for the teacher's course
+            cmbAsignaturas.removeAllItems();
+            if (profesor.getCurso() != null && profesor.getCurso().getASignaturas() != null && !profesor.getCurso().getASignaturas().isEmpty()) {
+                for (Asignatura asig : profesor.getCurso().getASignaturas()) {
+                    cmbAsignaturas.addItem(asig);
+                }
+            }
+            actualizarEstadoControlesAsignatura();
         }
     }
-    
-    private void disableInteraction() {
-        cmbEstudiantes.setEnabled(false);
-        cmbAsignaturas.setEnabled(false);
-        btnAgregarCalificacion.setEnabled(false);
-    }
 
-    private void disableStudentSpecificInteraction() {
-        cmbAsignaturas.setEnabled(false);
-        btnAgregarCalificacion.setEnabled(false);
-        cmbAsignaturas.removeAllItems(); 
-    }
-    
-    private void enableInteraction() {
-        cmbEstudiantes.setEnabled(true);
+    private void actualizarEstadoControlesAsignatura() {
+        Profesor profesor = controlador.getProfesor();
+        Curso curso = (profesor != null) ? profesor.getCurso() : null;
+        Estudiante estudianteSeleccionado = (Estudiante) cmbEstudiantes.getSelectedItem();
+
+        boolean habilitar = estudianteSeleccionado != null &&
+                            curso != null &&
+                            curso.getASignaturas() != null &&
+                            !curso.getASignaturas().isEmpty();
+
+        cmbAsignaturas.setEnabled(habilitar);
+        btnAgregarCalificacion.setEnabled(habilitar);
+
+        if (!habilitar) {
+            cmbAsignaturas.removeAllItems();
+        } else {
+            // Ensure cmbAsignaturas is populated if it was cleared but should be enabled
+            if (cmbAsignaturas.getItemCount() == 0 && curso != null && curso.getASignaturas() != null && !curso.getASignaturas().isEmpty()) {
+                for (Asignatura asig : curso.getASignaturas()) {
+                    cmbAsignaturas.addItem(asig);
+                }
+            }
+        }
+        
+        // Disable student combobox if no students
+        cmbEstudiantes.setEnabled(profesor != null && curso != null && curso.getEstudiantes() != null && !curso.getEstudiantes().isEmpty());
+
+        // If no students, also disable subject related controls
+        if (cmbEstudiantes.getItemCount() == 0) {
+            cmbAsignaturas.setEnabled(false);
+            btnAgregarCalificacion.setEnabled(false);
+            cmbAsignaturas.removeAllItems();
+        }
     }
 
 
@@ -158,23 +183,7 @@ public class MenuDocente extends javax.swing.JFrame {
         cmbEstudiantes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Estudiante seleccionado = (Estudiante) cmbEstudiantes.getSelectedItem();
-                cmbAsignaturas.removeAllItems();
-                if (seleccionado != null) {
-                    if (seleccionado.getAsignaturas() != null && !seleccionado.getAsignaturas().isEmpty()) {
-                        for (Asignatura asig : seleccionado.getAsignaturas()) {
-                            cmbAsignaturas.addItem(asig); 
-                        }
-                        cmbAsignaturas.setEnabled(true);
-                        btnAgregarCalificacion.setEnabled(true);
-                    } else {
-                        cmbAsignaturas.setEnabled(false);
-                        btnAgregarCalificacion.setEnabled(false);
-                    }
-                } else {
-                    cmbAsignaturas.setEnabled(false);
-                    btnAgregarCalificacion.setEnabled(false);
-                }
+                actualizarEstadoControlesAsignatura();
             }
         });
 
@@ -211,11 +220,7 @@ public class MenuDocente extends javax.swing.JFrame {
             }
         });
         
-        if (cmbEstudiantes.getItemCount() > 0) {
-            cmbEstudiantes.setSelectedIndex(0); 
-        } else {
-            cmbAsignaturas.setEnabled(false);
-            btnAgregarCalificacion.setEnabled(false);
-        }
+        // Initial call to set component states correctly after everything is loaded.
+        actualizarEstadoControlesAsignatura(); 
     }
 }
