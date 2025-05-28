@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.awt.*;    
 import java.awt.event.ActionEvent; 
 import java.awt.event.ActionListener; 
+import java.io.IOException;
+import java.lang.ClassNotFoundException;
 
 /**
  *
@@ -72,27 +74,35 @@ public class MenuAdmin extends javax.swing.JFrame {
         if (btnListarDocentes != null) {
             btnListarDocentes.addActionListener(e -> {
                 if (this.controlador == null) { return; }
-                String listaDocentes = controlador.listarTodosLosProfesores();
-                JTextArea textArea = new JTextArea(listaDocentes);
-                textArea.setEditable(false);
-                textArea.setWrapStyleWord(true);
-                textArea.setLineWrap(true);
-                JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(500, 400));
-                JOptionPane.showMessageDialog(this, scrollPane, "Lista de Docentes", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    String listaDocentes = controlador.listarTodosLosProfesores();
+                    JTextArea textArea = new JTextArea(listaDocentes);
+                    textArea.setEditable(false);
+                    textArea.setWrapStyleWord(true);
+                    textArea.setLineWrap(true);
+                    JScrollPane scrollPane = new JScrollPane(textArea);
+                    scrollPane.setPreferredSize(new Dimension(500, 400));
+                    JOptionPane.showMessageDialog(this, scrollPane, "Lista de Docentes", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(this, "Error al acceder a los datos de docentes: " + ex.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                }
             });
         }
         if (btnListarEstudiantes != null) {
             btnListarEstudiantes.addActionListener(e -> {
                 if (this.controlador == null) { return; }
-                String listaEstudiantes = controlador.listarTodosLosEstudiantes();
-                JTextArea textArea = new JTextArea(listaEstudiantes);
-                textArea.setEditable(false);
-                textArea.setWrapStyleWord(true);
-                textArea.setLineWrap(true);
-                JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(500, 400));
-                JOptionPane.showMessageDialog(this, scrollPane, "Lista de Estudiantes", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    String listaEstudiantes = controlador.listarTodosLosEstudiantes();
+                    JTextArea textArea = new JTextArea(listaEstudiantes);
+                    textArea.setEditable(false);
+                    textArea.setWrapStyleWord(true);
+                    textArea.setLineWrap(true);
+                    JScrollPane scrollPane = new JScrollPane(textArea);
+                    scrollPane.setPreferredSize(new Dimension(500, 400));
+                    JOptionPane.showMessageDialog(this, scrollPane, "Lista de Estudiantes", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(this, "Error al acceder a los datos de estudiantes: " + ex.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                }
             });
         }
         if (btnCrearAsignatura != null) {
@@ -116,6 +126,8 @@ public class MenuAdmin extends javax.swing.JFrame {
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(this, "El código ingresado no es un número válido.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+                    } catch (IOException | ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(this, "Error al acceder a los datos: " + ex.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
                     }
                 } else if (codigoStr != null) {
                     JOptionPane.showMessageDialog(this, "El código del estudiante no puede estar vacío.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
@@ -136,6 +148,8 @@ public class MenuAdmin extends javax.swing.JFrame {
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(this, "El código ingresado no es un número válido.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+                    } catch (IOException | ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(this, "Error al acceder a los datos: " + ex.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
                     }
                 } else if (codigoStr != null) {
                     JOptionPane.showMessageDialog(this, "El código del docente no puede estar vacío.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
@@ -161,6 +175,8 @@ public class MenuAdmin extends javax.swing.JFrame {
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(this, "Grado y/o Grupo ingresados no son números válidos.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(this, "Error al acceder a los datos: " + ex.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
                 }
             });
         }
@@ -169,10 +185,14 @@ public class MenuAdmin extends javax.swing.JFrame {
                 if (this.controlador == null) { return; }
                 String nombreAsignatura = JOptionPane.showInputDialog(this, "Ingrese el nombre de la asignatura a eliminar:", "Eliminar Asignatura", JOptionPane.QUESTION_MESSAGE);
                 if (nombreAsignatura != null && !nombreAsignatura.trim().isEmpty()) {
-                    if (controlador.eliminarAsignatura(nombreAsignatura.trim())) {
-                        JOptionPane.showMessageDialog(this, "Asignatura \"" + nombreAsignatura.trim() + "\" eliminada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "No se encontró o no se pudo eliminar la asignatura \"" + nombreAsignatura.trim() + "\".", "Error", JOptionPane.ERROR_MESSAGE);
+                    try {
+                        if (controlador.eliminarAsignatura(nombreAsignatura.trim())) {
+                            JOptionPane.showMessageDialog(this, "Asignatura \"" + nombreAsignatura.trim() + "\" eliminada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(this, "No se encontró o no se pudo eliminar la asignatura \"" + nombreAsignatura.trim() + "\".", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (IOException | ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(this, "Error al acceder a los datos: " + ex.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
                     }
                 } else if (nombreAsignatura != null) {
                     JOptionPane.showMessageDialog(this, "El nombre de la asignatura no puede estar vacío.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
@@ -186,8 +206,8 @@ public class MenuAdmin extends javax.swing.JFrame {
                 if (codigoStr != null && !codigoStr.trim().isEmpty()) {
                     try {
                         int codigo = Integer.parseInt(codigoStr.trim());
-                        if (controlador.buscarEstudiante(codigo) != null) {
-                            String reporte = controlador.generarReporteEstudiante(codigo);
+                        if (controlador.buscarEstudiante(codigo) != null) { // buscarEstudiante can throw
+                            String reporte = controlador.generarReporteEstudiante(codigo); // generarReporteEstudiante can throw
                             JTextArea textArea = new JTextArea(reporte);
                             textArea.setEditable(false);
                             textArea.setWrapStyleWord(true);
@@ -195,11 +215,13 @@ public class MenuAdmin extends javax.swing.JFrame {
                             JScrollPane scrollPane = new JScrollPane(textArea);
                             scrollPane.setPreferredSize(new Dimension(500, 400));
                             JOptionPane.showMessageDialog(this, scrollPane, "Reporte Académico - Estudiante " + codigo, JOptionPane.INFORMATION_MESSAGE);
-                        } else {
+                        } else { // This else might be redundant if buscarEstudiante throws and is caught
                             JOptionPane.showMessageDialog(this, "Estudiante no encontrado con el código " + codigo + ".", "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(this, "El código ingresado no es un número válido.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+                    } catch (IOException | ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(this, "Error al acceder a los datos del estudiante: " + ex.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
                     }
                 } else if (codigoStr != null) {
                     JOptionPane.showMessageDialog(this, "El código del estudiante no puede estar vacío.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
