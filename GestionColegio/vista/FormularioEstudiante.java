@@ -10,6 +10,8 @@ import com.modelo.Estudiante;
 import java.awt.Frame;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import java.io.IOException;
+import java.lang.ClassNotFoundException;
 
 /**
  *
@@ -30,11 +32,22 @@ public class FormularioEstudiante extends javax.swing.JDialog {
 
     private void cargarCursos() {
         cmbCursos.removeAllItems();
-        if (controlador != null && controlador.getCursos() != null && !controlador.getCursos().isEmpty()) {
-            for (Curso curso : controlador.getCursos()) {
-                cmbCursos.addItem(curso); 
+        try {
+            // Ensure controlador is not null before using, though it should be set in constructor
+            if (controlador == null) {
+                JOptionPane.showMessageDialog(this, "Error: Controlador no inicializado.", "Error Interno", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        } else {
+            ArrayList<Curso> cursos = controlador.getCursos(); // Call can throw
+            if (cursos != null && !cursos.isEmpty()) { // cursos can be null if an error occurs before list creation or if DAO returns null (current DAOs return empty list)
+                for (Curso curso : cursos) {
+                    cmbCursos.addItem(curso); 
+                }
+            }
+            // If cursos is null or empty, the combo box will remain empty.
+        } catch (IOException | ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar lista de cursos: " + e.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+            // Optionally disable cmbCursos or add a specific "Error" item
         }
     }
 
@@ -73,19 +86,23 @@ public class FormularioEstudiante extends javax.swing.JDialog {
                 return;
             }
 
-            Estudiante estudiante = new Estudiante(nombre, edad, cedula, codigo, "Estudiante"); 
+            Estudiante estudiante = new Estudiante(nombre, edad, cedula, codigo, "Estudiante"); // Create student without course initially
             
+            controlador.agregarEstudiante(estudiante); // Persist the student first
+
+            // If a course was selected, now formally assign the student to the course
             if (cursoSeleccionado != null) {
-                estudiante.setCurso(cursoSeleccionado); 
+                controlador.asignarEstudianteACurso(estudiante.getCodigo(), cursoSeleccionado.getGrado(), cursoSeleccionado.getGrupo());
             }
-            
-            controlador.agregarEstudiante(estudiante); 
 
             JOptionPane.showMessageDialog(this, "Estudiante registrado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             this.dispose();
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Error en campos numéricos (Edad, Cédula, Código). Deben ser números válidos.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+        } catch (IOException | ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Error de persistencia de datos: " + e.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace(); // For debugging
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();

@@ -9,6 +9,9 @@ import com.modelo.Curso;
 import com.modelo.Profesor;
 import java.awt.Frame;
 import javax.swing.JOptionPane;
+import java.io.IOException;
+import java.lang.ClassNotFoundException;
+import java.util.ArrayList; // Added for ArrayList<Curso> type
 
 /**
  *
@@ -36,12 +39,20 @@ public class FormularioDocente extends javax.swing.JDialog {
      
     private void cargarCursos() {
         cmbCursos.removeAllItems(); 
-        if (controlador.getCursos() == null || controlador.getCursos().isEmpty()) {
-            cmbCursos.addItem(null); 
-        } else {
-            for (Curso curso : controlador.getCursos()) {
-                cmbCursos.addItem(curso); 
+        try {
+            ArrayList<Curso> cursos = controlador.getCursos(); // Call can throw
+            if (cursos == null || cursos.isEmpty()) { // cursos can be null if an error occurs before list creation in DAO or if DAO returns null (though current DAOs return empty list)
+                // cmbCursos.addItem(null); // Adding null might not be desired. Maybe an empty string or disable.
+                                          // For now, if empty, the combo box will just be empty.
+            } else {
+                for (Curso curso : cursos) {
+                    cmbCursos.addItem(curso); 
+                }
             }
+        } catch (IOException | ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar lista de cursos: " + e.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+            // Optionally disable cmbCursos or add a specific "Error" item
+            // cmbCursos.setEnabled(false); 
         }
     }
     /**
@@ -214,6 +225,9 @@ public class FormularioDocente extends javax.swing.JDialog {
                 "Error de Formato", 
                 JOptionPane.ERROR_MESSAGE
             );
+        } catch (IOException | ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Error de persistencia de datos: " + e.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace(); // For debugging
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Ocurrió un error inesperado: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();

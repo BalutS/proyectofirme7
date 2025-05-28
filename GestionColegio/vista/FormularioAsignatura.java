@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List; 
+import java.io.IOException;
+import java.lang.ClassNotFoundException;
 
 /**
  *
@@ -55,11 +57,24 @@ public class FormularioAsignatura extends JDialog {
     }
 
     private void populateCursos() {
-        List<Curso> cursos = controlador.getCursos(); 
-        if (cursos != null) {
-            for (Curso curso : cursos) {
-                cmbCursos.addItem(curso);
+        // cmbCursos.removeAllItems(); // Usually done before populating if this can be called multiple times
+        // It's better to clear items at the start of the method to avoid duplicates if called multiple times.
+        cmbCursos.removeAllItems(); 
+        try {
+            // Ensure controlador is not null
+            if (this.controlador == null) {
+                 JOptionPane.showMessageDialog(this, "Error: Controlador no inicializado.", "Error Interno", JOptionPane.ERROR_MESSAGE);
+                 return;
             }
+            List<Curso> cursos = controlador.getCursos(); // Call can throw
+            if (cursos != null) { // cursos can be null if an error occurs before list creation or if DAO returns null (current DAOs return empty list)
+                for (Curso curso : cursos) {
+                    cmbCursos.addItem(curso);
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar lista de cursos: " + e.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+            // Optionally disable cmbCursos or add a specific "Error" item
         }
     }
 
@@ -124,26 +139,40 @@ public class FormularioAsignatura extends JDialog {
             JOptionPane.showMessageDialog(this, "El nombre de la asignatura no puede estar vacío.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        if (cursoSeleccionado == null) {
+        if (cursoSeleccionado == null && cmbCursos.getItemCount() > 0) { // Check if items exist before demanding selection
             JOptionPane.showMessageDialog(this, "Debe seleccionar un curso.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        if (controlador.existeAsignaturaGlobalmente(nombreAsignatura)) {
-            Asignatura asigExistenteEnCurso = cursoSeleccionado.buscarAsignatura(nombreAsignatura);
-            if (asigExistenteEnCurso != null) {
-                 JOptionPane.showMessageDialog(this, "Una asignatura con este nombre ya existe en el curso seleccionado.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                 return;
-            } else {
-                 JOptionPane.showMessageDialog(this, "Una asignatura con este nombre ya existe globalmente en el sistema. No se puede crear una nueva con el mismo nombre.", "Error de Duplicación", JOptionPane.ERROR_MESSAGE);
-                 return;
+        
+        try { // Start try-catch here to cover controller calls
+            if (controlador.existeAsignaturaGlobalmente(nombreAsignatura)) {
+                // The rest of this existing duplicate check logic is fine...
+                // However, cursoSeleccionado could be null if cmbCursos.getItemCount() == 0
+                if (cursoSeleccionado != null) { 
+                    Asignatura asigExistenteEnCurso = cursoSeleccionado.buscarAsignatura(nombreAsignatura); // This call is on Curso, not controller
+                    if (asigExistenteEnCurso != null) {
+                         JOptionPane.showMessageDialog(this, "Una asignatura con este nombre ya existe en el curso seleccionado.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+                         return;
+                    } else {
+                         JOptionPane.showMessageDialog(this, "Una asignatura con este nombre ya existe globalmente en el sistema. No se puede crear una nueva con el mismo nombre.", "Error de Duplicación", JOptionPane.ERROR_MESSAGE);
+                         return;
+                    }
+                } else { // If cursoSeleccionado is null (no courses available/selected) but asignatura exists globally
+                     JOptionPane.showMessageDialog(this, "Una asignatura con este nombre ya existe globalmente en el sistema.", "Error de Duplicación", JOptionPane.ERROR_MESSAGE);
+                     return;
+                }
             }
+
+            controlador.crearAsignatura(nombreAsignatura, cursoSeleccionado); // This call throws
+
+            JOptionPane.showMessageDialog(this, "Asignatura creada y asociada al curso exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            dispose();
+
+        } catch (IOException | ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Error de persistencia de datos: " + e.getMessage(), "Error de Datos", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace(); // For debugging
         }
-
-        controlador.crearAsignatura(nombreAsignatura, cursoSeleccionado);
-
-        JOptionPane.showMessageDialog(this, "Asignatura creada y asociada al curso exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        dispose();
+        // No general Exception catch here unless other runtime errors are expected from non-controller calls.
+        // The existing validation logic does not throw these exceptions.
     }
 }
