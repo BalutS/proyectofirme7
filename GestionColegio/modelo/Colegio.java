@@ -257,6 +257,23 @@ public class Colegio {
         cursoDAO.actualizarListaCursos(todosCursos);
     }
     
+    // Methods to retrieve lists of entities directly from DAOs
+    public ArrayList<Curso> listarCursos() throws IOException, ClassNotFoundException {
+        return cursoDAO.listarCursos();
+    }
+
+    public ArrayList<Asignatura> listarAsignaturas() throws IOException, ClassNotFoundException {
+        return asignaturaDAO.listarAsignaturas();
+    }
+
+    public ArrayList<Estudiante> listarEstudiantes() throws IOException, ClassNotFoundException {
+        return estudianteDAO.listarEstudiantes();
+    }
+
+    public ArrayList<Profesor> listarProfesores() throws IOException, ClassNotFoundException {
+        return profesorDAO.listarProfesores();
+    }
+    
     public Profesor buscarProfesor(int cod) throws IOException, ClassNotFoundException {
         ArrayList<Profesor> profesores = profesorDAO.listarProfesores();
         for (Profesor profesor : profesores) {
